@@ -47,7 +47,7 @@ public partial class Form1 : Form
         var exStyle = GetWindowLong(this.Handle, GWL_EXSTYLE);
         SetWindowLong(this.Handle, GWL_EXSTYLE, exStyle | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
 
-        SetToScreenSize();
+        ReloadSize();
     }
 
     private void InitializeButton()
@@ -56,8 +56,8 @@ public partial class Form1 : Form
 
         myButton.Drag += (sender, e) =>
         {
-            this.Left += e.DeltaX;
-            this.Top += e.DeltaY;
+            myButton.Left += e.DeltaX;
+            myButton.Top += e.DeltaY;
         };
 
         myButton.NonDragClick += (sender, e) => { SendKeys.SendWait(keystroke); };
@@ -71,16 +71,29 @@ public partial class Form1 : Form
 
         if (m.Msg == WM_DISPLAYCHANGE)
         {
-            SetToScreenSize();
+            ReloadSize();
         }
 
         base.WndProc(ref m);
     }
 
-    private void SetToScreenSize()
+    private void ReloadSize()
     {
         var screenBounds = Screen.PrimaryScreen.Bounds;
+
         this.Location = new Point(0, 0);
         this.Size = new Size(screenBounds.Width, screenBounds.Height);
+
+        var scaleX = (float)screenBounds.Width / this.Width;
+        var scaleY = (float)screenBounds.Height / this.Height;
+
+        foreach (Control control in this.Controls)
+        {
+            var controlCenterX = control.Left + control.Width / 2;
+            var controlCenterY = control.Top + control.Height / 2;
+
+            control.Left = (int)(controlCenterX * scaleX - control.Width / 2);
+            control.Top = (int)(controlCenterY * scaleY - control.Height / 2);
+        }
     }
 }
