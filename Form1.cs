@@ -25,8 +25,6 @@ public partial class Form1 : Form
         this.label = label;
         this.keystroke = keystroke;
 
-        this.Load += OnLoad;
-
         InitilizeComponent();
         InitializeButton();
     }
@@ -34,9 +32,22 @@ public partial class Form1 : Form
     private void InitilizeComponent()
     {
         this.SuspendLayout();
-        this.ClientSize = new Size(200, 200);
         this.Name = "Form1";
         this.ResumeLayout(false);
+
+        this.ShowInTaskbar = false; // Hide from taskbar
+        this.FormBorderStyle = FormBorderStyle.None; // Remove window borders
+        this.TopMost = true; // Keep the form on top
+        this.WindowState = FormWindowState.Normal; // Set normal state
+        this.BackColor = Color.Lime; // Set a background color (used for transparency)
+        this.TransparencyKey = Color.Lime; // Make this color transparent
+        this.AllowTransparency = true; // Enable transparency
+
+        // Set the window styles to hide it and allow interaction
+        var exStyle = GetWindowLong(this.Handle, GWL_EXSTYLE);
+        SetWindowLong(this.Handle, GWL_EXSTYLE, exStyle | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
+
+        SetToScreenSize();
     }
 
     private void InitializeButton()
@@ -54,18 +65,22 @@ public partial class Form1 : Form
         this.Controls.Add(myButton);
     }
 
-    private void OnLoad(object? sender, EventArgs e)
+    protected override void WndProc(ref Message m)
     {
-        this.ShowInTaskbar = false; // Hide from taskbar
-        this.FormBorderStyle = FormBorderStyle.None; // Remove window borders
-        this.TopMost = true; // Keep the form on top
-        this.WindowState = FormWindowState.Normal; // Set normal state
-        this.BackColor = Color.Lime; // Set a background color (used for transparency)
-        this.TransparencyKey = Color.Lime; // Make this color transparent
-        this.AllowTransparency = true; // Enable transparency
+        const int WM_DISPLAYCHANGE = 0x007E;
 
-        // Set the window styles to hide it and allow interaction
-        var exStyle = GetWindowLong(this.Handle, GWL_EXSTYLE);
-        SetWindowLong(this.Handle, GWL_EXSTYLE, exStyle | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
+        if (m.Msg == WM_DISPLAYCHANGE)
+        {
+            SetToScreenSize();
+        }
+
+        base.WndProc(ref m);
+    }
+
+    private void SetToScreenSize()
+    {
+        var screenBounds = Screen.PrimaryScreen.Bounds;
+        this.Location = new Point(0, 0);
+        this.Size = new Size(screenBounds.Width, screenBounds.Height);
     }
 }
