@@ -47,7 +47,7 @@ public partial class Form1 : Form
         var exStyle = GetWindowLong(this.Handle, GWL_EXSTYLE);
         SetWindowLong(this.Handle, GWL_EXSTYLE, exStyle | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
 
-        ReloadSize();
+        OnDisplaySizeChange();
     }
 
     private void InitializeButton()
@@ -69,24 +69,23 @@ public partial class Form1 : Form
     {
         const int WM_DISPLAYCHANGE = 0x007E;
 
-        if (m.Msg == WM_DISPLAYCHANGE)
-        {
-            ReloadSize();
-        }
+        if (m.Msg == WM_DISPLAYCHANGE) OnDisplaySizeChange();
 
         base.WndProc(ref m);
     }
 
-    private void ReloadSize()
+    private void OnDisplaySizeChange()
     {
         var screenBounds = Screen.PrimaryScreen.Bounds;
-
-        this.Location = new Point(0, 0);
-        this.Size = new Size(screenBounds.Width, screenBounds.Height);
 
         var scaleX = (float)screenBounds.Width / this.Width;
         var scaleY = (float)screenBounds.Height / this.Height;
 
+        // Fullscreen
+        this.Location = new Point(0, 0);
+        this.Size = new Size(screenBounds.Width, screenBounds.Height);
+
+        // Scale controls positions proportionally
         foreach (Control control in this.Controls)
         {
             var controlCenterX = control.Left + control.Width / 2;
