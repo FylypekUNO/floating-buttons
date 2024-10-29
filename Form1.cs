@@ -15,12 +15,12 @@ public partial class Form1 : Form
     private const int WS_EX_TOOLWINDOW = 0x80; // Hides from Alt+Tab
     private const int WS_EX_NOACTIVATE = 0x8000000; // Prevents activation on click
 
-    private CustomButton1 myButton;
+    private Button myButton;
 
-    public String label { get; private set; }
-    public String keystroke { get; private set; }
+    public string label { get; private set; }
+    public string keystroke { get; private set; }
 
-    public Form1(String label, String keystroke)
+    public Form1(string label, string keystroke)
     {
         this.label = label;
         this.keystroke = keystroke;
@@ -52,15 +52,10 @@ public partial class Form1 : Form
 
     private void InitializeButton()
     {
-        myButton = new CustomButton1(label);
-
-        myButton.Drag += (sender, e) =>
+        myButton = new KeystrokeButton(label, keystroke)
         {
-            myButton.Left += e.DeltaX;
-            myButton.Top += e.DeltaY;
+            Location = new Point(100, 100)
         };
-
-        myButton.NonDragClick += (sender, e) => { SendKeys.SendWait(keystroke); };
 
         this.Controls.Add(myButton);
     }

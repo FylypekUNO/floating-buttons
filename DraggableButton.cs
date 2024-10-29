@@ -16,79 +16,67 @@ public class DragEventArgs : EventArgs
     }
 }
 
-public class CustomButton1 : Button
+public class DraggableButton : Button
 {
-    private bool isMouseDown = false;
-    private bool isDragging = false;
+    public bool IsDragging { get; private set; } = false;
 
-    private Point lastLocation;
-    private TimeSpan clickTime;
+    private bool _isMouseDown = false;
+    private Point _lastLocation;
+    private TimeSpan _clickTime;
 
     public event EventHandler DragStart = delegate { };
     public event EventHandler DragEnd = delegate { };
     public event EventHandler<DragEventArgs> Drag = delegate { };
-    public event EventHandler NonDragClick = delegate { };
-
-    public CustomButton1(String text)
-    {
-        this.Text = text;
-
-        SetVisuals();
-    }
-
-    private void SetVisuals()
-    {
-        this.FlatStyle = FlatStyle.Flat; // Remove button border
-        this.BackColor = Color.LightBlue; // Initial color
-    }
 
     protected override void OnMouseDown(MouseEventArgs e)
     {
         base.OnMouseDown(e);
 
-        isMouseDown = true;
-        lastLocation = e.Location;
-        clickTime = DateTime.Now.TimeOfDay;
+        _isMouseDown = true;
+        _lastLocation = e.Location;
+        _clickTime = DateTime.Now.TimeOfDay;
     }
 
     protected override void OnMouseUp(MouseEventArgs e)
     {
         base.OnMouseUp(e);
 
-        if (isDragging) DragEnd(this, EventArgs.Empty);
-        else NonDragClick(this, EventArgs.Empty);
+        if (IsDragging) OnDragEnd(EventArgs.Empty);
 
-
-        isMouseDown = false;
-        isDragging = false;
+        _isMouseDown = false;
+        IsDragging = false;
     }
 
     protected override void OnMouseMove(MouseEventArgs e)
     {
         base.OnMouseMove(e);
 
-        if (!isMouseDown) return;
+        if (!_isMouseDown) return;
 
-        if (!isDragging)
+        if (!IsDragging)
         {
-            isDragging = CheckIfDragging(e);
+            IsDragging = DragCheck(e);
 
-            if (isDragging) DragStart(this, EventArgs.Empty);
+            if (IsDragging) OnDragStart(EventArgs.Empty);
             else return;
         }
 
-        Drag(this, new DragEventArgs(lastLocation, e.Location));
+        OnDrag(new DragEventArgs(_lastLocation, e.Location));
     }
 
-    private bool CheckIfDragging(MouseEventArgs e)
+    private bool DragCheck(MouseEventArgs e)
     {
         // Check if the mouse has moved more than 10 pixels
-        var dx = e.Location.X - lastLocation.X;
-        var dy = e.Location.Y - lastLocation.Y;
+        var dx = e.Location.X - _lastLocation.X;
+        var dy = e.Location.Y - _lastLocation.Y;
 
         // Check if the mouse has been held for more than 100ms
-        var timediff = DateTime.Now.TimeOfDay - clickTime;
+        var timediff = DateTime.Now.TimeOfDay - _clickTime;
 
         return dx + dy > 10 || timediff.TotalMilliseconds > 100;
     }
+
+    protected virtual void OnDragStart(EventArgs e) => DragStart(this, e);
+    protected virtual void OnDragEnd(EventArgs e) => DragEnd(this, e);
+    protected virtual void OnDrag(DragEventArgs e) => Drag(this, e);
 }
