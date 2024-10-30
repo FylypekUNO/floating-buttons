@@ -1,6 +1,6 @@
 ﻿namespace floating_buttons;
 
-partial class Form1
+partial class OverlayForm
 {
     /// <summary>
     ///  Required designer variable.

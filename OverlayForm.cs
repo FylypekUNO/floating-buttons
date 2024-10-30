@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace floating_buttons;
 
-public partial class Form1 : Form
+public partial class OverlayForm : Form
 {
     [DllImport("user32.dll", SetLastError = true)]
     private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
@@ -15,24 +15,30 @@ public partial class Form1 : Form
     private const int WS_EX_TOOLWINDOW = 0x80; // Hides from Alt+Tab
     private const int WS_EX_NOACTIVATE = 0x8000000; // Prevents activation on click
 
-    private Button myButton;
+    public string Label { get; private set; }
+    public string Keystroke { get; private set; }
 
-    public string label { get; private set; }
-    public string keystroke { get; private set; }
-
-    public Form1(string label, string keystroke)
+    public OverlayForm(string label, string keystroke)
     {
-        this.label = label;
-        this.keystroke = keystroke;
+        this.Label = label;
+        this.Keystroke = keystroke;
 
-        InitilizeComponent();
-        InitializeButton();
+        SetVisuals();
+
+        Button myButton = new KeystrokeButton(Label, Keystroke)
+        {
+            Location = new Point(100, 100)
+        };
+
+        this.Controls.Add(myButton);
+
+        OnDisplaySizeChange();
     }
 
-    private void InitilizeComponent()
+    private void SetVisuals()
     {
         this.SuspendLayout();
-        this.Name = "Form1";
+        this.Name = "OverlayForm";
         this.ResumeLayout(false);
 
         this.ShowInTaskbar = false; // Hide from taskbar
@@ -46,18 +52,6 @@ public partial class Form1 : Form
         // Set the window styles to hide it and allow interaction
         var exStyle = GetWindowLong(this.Handle, GWL_EXSTYLE);
         SetWindowLong(this.Handle, GWL_EXSTYLE, exStyle | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
-
-        OnDisplaySizeChange();
-    }
-
-    private void InitializeButton()
-    {
-        myButton = new KeystrokeButton(label, keystroke)
-        {
-            Location = new Point(100, 100)
-        };
-
-        this.Controls.Add(myButton);
     }
 
     protected override void WndProc(ref Message m)
