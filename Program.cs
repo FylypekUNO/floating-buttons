@@ -12,6 +12,11 @@ static class Program
         // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();
 
-        Application.Run(new OverlayForm("Undo", "^z"));
+        var overlayForm = new OverlayForm();
+
+        overlayForm.AddKeystrokeButton("Ctrl+Z", "^z");
+        overlayForm.AddKeystrokeButton("Ctrl+Y", "^y");
+
+        Application.Run(overlayForm);
     }
 }

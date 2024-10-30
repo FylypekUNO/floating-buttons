@@ -2,6 +2,20 @@ using System.Runtime.InteropServices;
 
 namespace floating_buttons;
 
+public class ButtonAndData
+{
+    public readonly string Label;
+    public readonly string Keystroke;
+    public readonly KeystrokeButton Button;
+
+    public ButtonAndData(string label, string keystroke, KeystrokeButton button)
+    {
+        Label = label;
+        Keystroke = keystroke;
+        Button = button;
+    }
+}
+
 public partial class OverlayForm : Form
 {
     [DllImport("user32.dll", SetLastError = true)]
@@ -15,24 +29,24 @@ public partial class OverlayForm : Form
     private const int WS_EX_TOOLWINDOW = 0x80; // Hides from Alt+Tab
     private const int WS_EX_NOACTIVATE = 0x8000000; // Prevents activation on click
 
-    public string Label { get; private set; }
-    public string Keystroke { get; private set; }
+    public List<ButtonAndData> KeystrokeButtons { get; private set; } = new List<ButtonAndData>();
 
-    public OverlayForm(string label, string keystroke)
+    public OverlayForm()
     {
-        this.Label = label;
-        this.Keystroke = keystroke;
-
         SetVisuals();
 
-        Button myButton = new KeystrokeButton(Label, Keystroke)
+        OnDisplaySizeChange();
+    }
+
+    public void AddKeystrokeButton(string label, string keystroke)
+    {
+        var myButton = new KeystrokeButton(label, keystroke)
         {
             Location = new Point(100, 100)
         };
 
         this.Controls.Add(myButton);
-
-        OnDisplaySizeChange();
+        KeystrokeButtons.Add(new ButtonAndData(label, keystroke, myButton));
     }
 
     private void SetVisuals()
