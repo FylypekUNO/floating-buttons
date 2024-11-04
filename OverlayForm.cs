@@ -31,11 +31,61 @@ public partial class OverlayForm : Form
 
     public List<ButtonAndData> KeystrokeButtons { get; private set; } = new List<ButtonAndData>();
 
+    private NotifyIcon _trayIcon;
+    private ContextMenuStrip _trayMenu;
+    private bool _buttonsEnabled = true;
+
     public OverlayForm()
     {
         SetVisuals();
-
+        InitializeTrayIcon();
         OnDisplaySizeChange();
+    }
+
+    private void InitializeTrayIcon()
+    {
+        _trayMenu = new ContextMenuStrip();
+
+        _trayMenu.Items.Add("Disable Buttons", null, (sender, e) => OnToggleButtons());
+        _trayMenu.Items.Add(new ToolStripSeparator());
+        _trayMenu.Items.Add("Control Panel", null, (sender, e) => OnOpenControlPanel());
+        _trayMenu.Items.Add(new ToolStripSeparator());
+        _trayMenu.Items.Add("Exit", null, (sender, e) => OnExit());
+
+        _trayIcon = new NotifyIcon
+        {
+            Text = "Floating Buttons",
+            Icon = SystemIcons.Application, // Template
+            ContextMenuStrip = _trayMenu,
+            Visible = true
+        };
+
+        _trayIcon.MouseDoubleClick += (sender, e) =>
+        {
+            if (e.Button != MouseButtons.Left) return;
+            OnToggleButtons();
+        };
+    }
+
+    private void OnToggleButtons()
+    {
+        _buttonsEnabled = !_buttonsEnabled;
+
+        foreach (var btnData in KeystrokeButtons)
+        {
+            btnData.Button.Enabled = _buttonsEnabled;
+            btnData.Button.Visible = _buttonsEnabled;
+        }
+    }
+
+    private void OnOpenControlPanel()
+    {
+    }
+
+    private void OnExit()
+    {
+        _trayIcon.Visible = false;
+        Application.Exit();
     }
 
     public void AddKeystrokeButton(string label, string keystroke)
