@@ -15,8 +15,6 @@ public class KeystrokeButton : DraggableButton
 
     private void SetVisuals()
     {
-        this.FlatStyle = FlatStyle.Flat; // Remove button border
-        this.BackColor = Color.LightBlue; // Initial color
         this.Text = _label;
     }
 

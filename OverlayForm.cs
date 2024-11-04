@@ -40,7 +40,7 @@ public partial class OverlayForm : Form
 
     public void AddKeystrokeButton(string label, string keystroke)
     {
-        var myButton = new KeystrokeButton(label, keystroke)
+        var myButton = new SingleKeystrokeButton(label, keystroke)
         {
             Location = new Point(100, 100)
         };
